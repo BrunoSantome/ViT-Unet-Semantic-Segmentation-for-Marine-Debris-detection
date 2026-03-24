@@ -21,11 +21,16 @@ keep class weighting logic
 '''
 
 import os
+import sys
 import ast
 import json
 import random
 import logging
 import argparse
+
+# Add parent directory (src/) to path so utils can be found
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 import numpy as np
 from tqdm import tqdm
 
@@ -35,7 +40,7 @@ from torch.utils.data import DataLoader
 
 import wandb
 
-from model import UNet #todo
+from unet import UNet
 from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform , class_distr, gen_weights
 from utils.metrics import Evaluation
 
@@ -86,19 +91,21 @@ def main(options):
     standardization = transforms.Normalize(bands_mean, bands_std)
 
     # Construct Data loader
+    prefetch = options['prefetch_factor'] if options['num_workers'] > 0 else None
+    persist  = options['persistent_workers'] if options['num_workers'] > 0 else False
 
     if options['mode']=='train':
 
-        dataset_train = GenDEBRIS('train', transform=transform_train, standardization = standardization, agg_to_water = options['agg_to_water'])
-        dataset_test = GenDEBRIS('val', transform=transform_test, standardization = standardization, agg_to_water = options['agg_to_water'])
+        dataset_train = GenDEBRIS('train', transform=transform_train, standardization = standardization, path = options['data_path'], agg_to_water = options['agg_to_water'])
+        dataset_test = GenDEBRIS('val', transform=transform_test, standardization = standardization, path = options['data_path'], agg_to_water = options['agg_to_water'])
 
         train_loader = DataLoader(  dataset_train,
                                     batch_size = options['batch'],
                                     shuffle = True,
                                     num_workers = options['num_workers'],
                                     pin_memory = options['pin_memory'],
-                                    prefetch_factor = options['prefetch_factor'],
-                                    persistent_workers= options['persistent_workers'],
+                                    prefetch_factor = prefetch,
+                                    persistent_workers= persist,
                                     worker_init_fn=seed_worker,
                                     generator=g)
 
@@ -107,22 +114,22 @@ def main(options):
                                     shuffle = False,
                                     num_workers = options['num_workers'],
                                     pin_memory = options['pin_memory'],
-                                    prefetch_factor = options['prefetch_factor'],
-                                    persistent_workers= options['persistent_workers'],
+                                    prefetch_factor = prefetch,
+                                    persistent_workers= persist,
                                     worker_init_fn=seed_worker,
                                     generator=g)
 
     elif options['mode']=='test':
 
-        dataset_test = GenDEBRIS('test', transform=transform_test, standardization = standardization, agg_to_water = options['agg_to_water'])
+        dataset_test = GenDEBRIS('test', transform=transform_test, standardization = standardization, path = options['data_path'], agg_to_water = options['agg_to_water'])
 
         test_loader = DataLoader(   dataset_test,
                                     batch_size = options['batch'],
                                     shuffle = False,
                                     num_workers = options['num_workers'],
                                     pin_memory = options['pin_memory'],
-                                    prefetch_factor = options['prefetch_factor'],
-                                    persistent_workers= options['persistent_workers'],
+                                    prefetch_factor = prefetch,
+                                    persistent_workers= persist,
                                     worker_init_fn=seed_worker,
                                     generator=g)
     else:
@@ -170,9 +177,9 @@ def main(options):
 
     # Learning Rate scheduler
     if options['reduce_lr_on_plateau']==1:
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10)
     else:
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1, verbose=True)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1)
 
     # Start training
     start = options['resume_from_epoch'] + 1
@@ -384,6 +391,7 @@ if __name__ == "__main__":
     parser.add_argument('--prefetch_factor', default=1, type=int, help='Number of sample loaded in advance by each worker')
     parser.add_argument('--persistent_workers', default=True, type=bool, help='This allows to maintain the workers Dataset instances alive.')
     parser.add_argument('--wandb_project', default='marida-segmentation', type=str, help='Wandb project name')
+    parser.add_argument('--data_path', default='data', type=str, help='Path to MARIDA dataset root')
 
     args = parser.parse_args()
     options = vars(args)  # convert to ordinary dict

@@ -27,7 +27,7 @@ import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-from model import UNet #todo
+from unet import UNet
 from dataloader import GenDEBRIS, bands_mean, bands_std
 from utils.metrics import Evaluation, confusion_matrix
 from utils.assets import labels
