@@ -1,2 +1,5 @@
 .venv/
 data/MARIDA/
+test.py
+src/u-net-Baseline/wandb
+src/u-net-Baseline/checkpoints

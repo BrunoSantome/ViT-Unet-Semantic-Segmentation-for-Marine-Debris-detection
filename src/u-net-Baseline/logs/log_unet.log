@@ -1,0 +1,160 @@
+root - INFO - **********
+root - INFO - parsed input parameters:
+root - INFO - {
+  "agg_to_water": true,
+  "mode": "train",
+  "epochs": 1,
+  "batch": 5,
+  "resume_from_epoch": 0,
+  "input_channels": 11,
+  "output_channels": 11,
+  "hidden_channels": 16,
+  "weight_param": 1.03,
+  "lr": 0.0002,
+  "decay": 0,
+  "reduce_lr_on_plateau": 0,
+  "lr_steps": [
+    40
+  ],
+  "checkpoint_path": "checkpoints",
+  "eval_every": 1,
+  "num_workers": 0,
+  "pin_memory": false,
+  "prefetch_factor": 1,
+  "persistent_workers": true,
+  "wandb_project": "marida-segmentation",
+  "data_path": "../../data/MARIDA"
+}
+root - INFO - **********
+root - INFO - parsed input parameters:
+root - INFO - {
+  "agg_to_water": true,
+  "mode": "train",
+  "epochs": 1,
+  "batch": 5,
+  "resume_from_epoch": 0,
+  "input_channels": 11,
+  "output_channels": 11,
+  "hidden_channels": 16,
+  "weight_param": 1.03,
+  "lr": 0.0002,
+  "decay": 0,
+  "reduce_lr_on_plateau": 0,
+  "lr_steps": [
+    40
+  ],
+  "checkpoint_path": "checkpoints",
+  "eval_every": 1,
+  "num_workers": 1,
+  "pin_memory": false,
+  "prefetch_factor": 1,
+  "persistent_workers": true,
+  "wandb_project": "marida-segmentation",
+  "data_path": "../../data/MARIDA"
+}
+root - INFO - **********
+root - INFO - parsed input parameters:
+root - INFO - {
+  "agg_to_water": true,
+  "mode": "train",
+  "epochs": 1,
+  "batch": 5,
+  "resume_from_epoch": 0,
+  "input_channels": 11,
+  "output_channels": 11,
+  "hidden_channels": 16,
+  "weight_param": 1.03,
+  "lr": 0.0002,
+  "decay": 0,
+  "reduce_lr_on_plateau": 0,
+  "lr_steps": [
+    40
+  ],
+  "checkpoint_path": "checkpoints",
+  "eval_every": 1,
+  "num_workers": 1,
+  "pin_memory": false,
+  "prefetch_factor": 1,
+  "persistent_workers": true,
+  "wandb_project": "marida-segmentation",
+  "data_path": "../../data/MARIDA"
+}
+root - INFO - **********
+root - INFO - Training loss was: 2.55476650793202
+root - INFO - **********
+root - INFO - 
+
+root - INFO - Test loss was: 1.4236607947585258
+root - INFO - STATISTICS AFTER EPOCH 1: 
+
+root - INFO - Evaluation: {'macroPrec': 0.24864231685757873, 'microPrec': 0.6307777496222466, 'weightPrec': 0.7056208318539289, 'macroRec': 0.287199027411409, 'microRec': 0.6307777496222466, 'weightRec': 0.6307777496222466, 'macroF1': 0.18888001709779398, 'microF1': 0.6307777496222466, 'weightF1': 0.6359776541350268, 'subsetAcc': 0.6307777496222466, 'IoU': 0.15184385858715296}
+root - INFO - Saving models
+root - INFO - **********
+root - INFO - parsed input parameters:
+root - INFO - {
+  "agg_to_water": true,
+  "mode": "train",
+  "epochs": 5,
+  "batch": 5,
+  "resume_from_epoch": 0,
+  "input_channels": 11,
+  "output_channels": 11,
+  "hidden_channels": 16,
+  "weight_param": 1.03,
+  "lr": 0.0002,
+  "decay": 0,
+  "reduce_lr_on_plateau": 0,
+  "lr_steps": [
+    40
+  ],
+  "checkpoint_path": "checkpoints",
+  "eval_every": 1,
+  "num_workers": 1,
+  "pin_memory": false,
+  "prefetch_factor": 1,
+  "persistent_workers": true,
+  "wandb_project": "marida-segmentation",
+  "data_path": "../../data/MARIDA"
+}
+root - INFO - **********
+root - INFO - Training loss was: 2.561812380892399
+root - INFO - **********
+root - INFO - 
+
+root - INFO - Test loss was: 1.4405510451814683
+root - INFO - STATISTICS AFTER EPOCH 1: 
+
+root - INFO - Evaluation: {'macroPrec': 0.247220701653604, 'microPrec': 0.632058826289758, 'weightPrec': 0.6988001402069761, 'macroRec': 0.3087865438669327, 'microRec': 0.632058826289758, 'weightRec': 0.632058826289758, 'macroF1': 0.19765209783918236, 'microF1': 0.632058826289758, 'weightF1': 0.6352992397105307, 'subsetAcc': 0.632058826289758, 'IoU': 0.15875193000835253}
+root - INFO - Saving models
+root - INFO - Training loss was: 2.1303755859133147
+root - INFO - 
+
+root - INFO - Test loss was: 1.093999076342254
+root - INFO - STATISTICS AFTER EPOCH 2: 
+
+root - INFO - Evaluation: {'macroPrec': 0.3195596184018341, 'microPrec': 0.6581167703728731, 'weightPrec': 0.7656222756853479, 'macroRec': 0.36576560411254005, 'microRec': 0.6581167703728731, 'weightRec': 0.6581167703728731, 'macroF1': 0.22856073554776746, 'microF1': 0.6581167703728731, 'weightF1': 0.6536997148853971, 'subsetAcc': 0.6581167703728731, 'IoU': 0.18360664409563007}
+root - INFO - Saving models
+root - INFO - Training loss was: 2.0030091547485043
+root - INFO - 
+
+root - INFO - Test loss was: 1.2399750441460191
+root - INFO - STATISTICS AFTER EPOCH 3: 
+
+root - INFO - Evaluation: {'macroPrec': 0.32085406913281084, 'microPrec': 0.6298720800367898, 'weightPrec': 0.7215061678687404, 'macroRec': 0.35787635381707356, 'microRec': 0.6298720800367898, 'weightRec': 0.6298720800367898, 'macroF1': 0.2144303451139392, 'microF1': 0.6298720800367898, 'weightF1': 0.5617429714985225, 'subsetAcc': 0.6298720800367898, 'IoU': 0.15720224198437255}
+root - INFO - Saving models
+root - INFO - Training loss was: 1.9428415260672225
+root - INFO - 
+
+root - INFO - Test loss was: 1.389776458218963
+root - INFO - STATISTICS AFTER EPOCH 4: 
+
+root - INFO - Evaluation: {'macroPrec': 0.31017685069216516, 'microPrec': 0.6860892905744667, 'weightPrec': 0.7080044694589718, 'macroRec': 0.37981971399125475, 'microRec': 0.6860892905744667, 'weightRec': 0.6860892905744667, 'macroF1': 0.27195819035669905, 'microF1': 0.6860892905744667, 'weightF1': 0.6541608695651571, 'subsetAcc': 0.6860892905744667, 'IoU': 0.20296464827357025}
+root - INFO - Saving models
+root - INFO - Training loss was: 1.9163666042883045
+root - INFO - 
+
+root - INFO - Test loss was: 0.7905988333699644
+root - INFO - STATISTICS AFTER EPOCH 5: 
+
+root - INFO - Evaluation: {'macroPrec': 0.3807218163464587, 'microPrec': 0.7027620576062168, 'weightPrec': 0.8018160942562697, 'macroRec': 0.412406933965519, 'microRec': 0.7027620576062168, 'weightRec': 0.7027620576062168, 'macroF1': 0.2984812879347342, 'microF1': 0.7027620576062168, 'weightF1': 0.6679595103298498, 'subsetAcc': 0.7027620576062168, 'IoU': 0.22637941591333124}
+root - INFO - Saving models
