@@ -138,7 +138,6 @@ class Deconv2DBlock(nn.Module):
 
 ################## Decoder ####################
 
-
 class Decoder(nn.Module):
     def __init__(self, input_dim=11, output_dim=11,embed_dim=768):
         super().__init__()
@@ -212,7 +211,25 @@ class Decoder(nn.Module):
         output = self.decoder0_header(torch.cat([z0, z3], dim=1))
         return output
         
-    
+        
+
+class VitUnet(nn.Module):
+    def __init__(self, 
+                 in_channel=11,
+                 num_classes=11,
+                 img_size=256,
+                 embed_dim=768,
+                 pretrained=True,
+                 layers=(2, 5, 8, 11)):
+        super().__init__()
+        self.encoder = VitEncoder(in_chans=in_channel, img_size=img_size, pretrained=pretrained, layers=layers)
+        self.decoder = Decoder(input_dim=in_channel, output_dim=num_classes, embed_dim=embed_dim)
+        
+    def forward(self, x):
+        x_out = self.encoder(x)
+        logits = self.decoder(x, x_out)
+        return logits
+        
 
 if __name__ == "__main__":
     model = build_vit_encoder(in_chans=11)
@@ -244,6 +261,11 @@ if __name__ == "__main__":
     
     CLS token not included. 
     """
+    
+    model = VitUnet(in_channel=11, num_classes=11, img_size=256)
+    dummy = torch.randn(2, 11, 256, 256)
+    out = model(dummy)
+    print(out.shape)  # [2, 11, 256, 256] READY FOR TRAINING
 
           
    
