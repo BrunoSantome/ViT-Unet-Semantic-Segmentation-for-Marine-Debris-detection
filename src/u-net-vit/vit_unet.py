@@ -75,6 +75,19 @@ def adapt_positional_embeddings(model, img_size):
     model.pos_embed = nn.Parameter(pos_embed_new)
     
 
+#Encoder that build 
+class VitEncoder(nn.Module):
+    def __init__(self,  in_chans=11, img_size=256, pretrained=True, layers=(2, 5, 8, 11)):
+        super().__init__()
+        self.vit = build_vit_encoder(in_chans=in_chans, img_size=img_size, pretrained=pretrained)
+        self.skip_connections_layers = layers
+
+    def forward(self, x):
+        #get_intermediate_layers runs a forward pass internally
+        extract_layers= self.vit.get_intermediate_layers(x, n=self.skip_connections_layers, reshape=True)
+        return list(extract_layers)
+        
+        
     
 
 if __name__ == "__main__":
@@ -91,4 +104,20 @@ if __name__ == "__main__":
     
     dummy = torch.randn(2, 11, 256, 256)
     out = model.forward_features(dummy)
+    
     print("ViT feature output shape:", out.shape)   
+    extract_layers = model.get_intermediate_layers(dummy, n=[2, 5, 8, 11], reshape=True) #timm manages the permutation and reshape for me, no need to do it manually.
+    print(len(extract_layers))
+    for i, f in enumerate(extract_layers):
+          print(f"  Layer {[2,5,8,11][i]+1}: shape={f.shape}")
+
+    """
+    Layer 3: shape=torch.Size([2, 768, 16, 16])
+    Layer 6: shape=torch.Size([2, 768, 16, 16])
+    Layer 9: shape=torch.Size([2, 768, 16, 16])
+    Layer 12: shape=torch.Size([2, 768, 16, 16])
+    
+    CLS token not included. 
+    """
+          
+   
