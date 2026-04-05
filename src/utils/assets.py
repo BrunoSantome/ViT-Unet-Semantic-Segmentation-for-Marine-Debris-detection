@@ -94,6 +94,7 @@ s2_mapping = {'nm440': 0,
 # B4=Red (idx 3), B3=Green (idx 2), B2=Blue (idx 1)
 # Used to copy pretrained ImageNet RGB weights into the correct input channels
 S2_RGB_INDICES = [3, 2, 1]
+MODEL_DEFAULT= "vit_base_patch16_224"
 
 conf_mapping = {'High': 1,
                 'Moderate': 2,
