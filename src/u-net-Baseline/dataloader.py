@@ -108,19 +108,19 @@ class GenDEBRIS(Dataset): # Extend PyTorch's Dataset class
         img = self.X[index]
         target = self.y[index]
 
-        img = np.moveaxis(img, [0, 1, 2], [2, 0, 1]).astype('float32')       # CxWxH to WxHxC
+        img = np.moveaxis(img, [0, 1, 2], [2, 0, 1]).astype('float32')       #(C, H, W) → (H, W, C)
 
-        nan_mask = np.isnan(img)
-        img[nan_mask] = self.impute_nan[nan_mask]
+        nan_mask = np.isnan(img) # Satellite images can have NaN values from sensor gaps, cloud masking, or missing data in certain pixels
+        img[nan_mask] = self.impute_nan[nan_mask] # replaces any NaN pixels in the image with the precomputed band means
 
         if self.transform is not None:
             target = target[:,:,np.newaxis]
             stack = np.concatenate([img, target], axis=-1).astype('float32') # In order to rotate-transform both mask and image
 
-            stack = self.transform(stack)
+            stack = self.transform(stack) 
 
-            img = stack[:-1,:,:]
-            target = stack[-1,:,:].long()                                    # Recast target values back to int64 or torch long dtype
+            img = stack[:-1,:,:] # pulls out 11 bands
+            target = stack[-1,:,:].long()   #  pulls out  mask                               # Recast target values back to int64 or torch long dtype
 
         if self.standardization is not None:
             img = self.standardization(img)
@@ -144,4 +144,7 @@ class RandomRotationTransform:
 # Weighting Function for Semantic Segmentation                #
 ###############################################################
 def gen_weights(class_distribution, c = 1.02):
+    # Computes inverse-log class weights for the loss function to handle class imbalance
+    # the model is penalized more for misclassifying rare classes like Marine Debris and Foam, and less for 
+    # misclassifying dominant classes like water
     return 1/torch.log(c + class_distribution)

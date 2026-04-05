@@ -8,6 +8,7 @@ Licence: MIT
 Description: evaluation.py includes the code in order to produce
              the evaluation for each class as well as the prediction
              masks for the pixel-level semantic segmentation.
+             This is used once a model has been trained. 
 
 Modifications:
 - Replaced relative path resolution (sys.path / os.path.dirname chains) with direct imports.
@@ -120,6 +121,7 @@ def main(options):
         logging.info("Confusion Matrix:  \n" + str(conf_mat.to_string()))
         print("Confusion Matrix:  \n" + str(conf_mat.to_string()))
 
+        #This 
         if options['predict_masks']:
 
             path = os.path.join('data', 'patches')

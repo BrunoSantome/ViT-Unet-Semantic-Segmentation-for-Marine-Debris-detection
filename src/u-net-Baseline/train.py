@@ -100,14 +100,14 @@ def main(options):
         dataset_test = GenDEBRIS('val', transform=transform_test, standardization = standardization, path = options['data_path'], agg_to_water = options['agg_to_water'])
 
         train_loader = DataLoader(  dataset_train,
-                                    batch_size = options['batch'],
-                                    shuffle = True,
-                                    num_workers = options['num_workers'],
-                                    pin_memory = options['pin_memory'],
-                                    prefetch_factor = prefetch,
-                                    persistent_workers= persist,
-                                    worker_init_fn=seed_worker,
-                                    generator=g)
+                                    batch_size = options['batch'], #number of images processed at once
+                                    shuffle = True, 
+                                    num_workers = options['num_workers'], # handles multiple sub-process to load the dataset
+                                    pin_memory = options['pin_memory'], # allocates data in page-locked (pinned) CPU memory, which makes CPU→GPU transfers faster useful if trained with cuda
+                                    prefetch_factor = prefetch, # How many batches each worker loads in advance
+                                    persistent_workers= persist,  # !
+                                    worker_init_fn=seed_worker, #to recreate deterministic results
+                                    generator=g) #  shuffling random number generator. Makes the shuffle order reproducible across runs
 
         test_loader = DataLoader(   dataset_test,
                                     batch_size = options['batch'],
@@ -156,9 +156,9 @@ def main(options):
         logging.info('Loading model files from folder: %s' % model_file)
 
         checkpoint = torch.load(model_file, map_location = device)
-        model.load_state_dict(checkpoint)
+        model.load_state_dict(checkpoint) #it restores the exact learned weights from a previous run
 
-        del checkpoint  # dereference
+        del checkpoint  # dereference ,free from memory !
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
@@ -170,16 +170,18 @@ def main(options):
         class_distr = class_distr[:-4]    # Drop Mixed Water, Wakes, Cloud Shadows, Waves
 
     # Weighted Cross Entropy Loss & adam optimizer
-    weight = gen_weights(class_distr, c = options['weight_param'])
+    weight = gen_weights(class_distr, c = options['weight_param']) #handles class imbalance
     criterion = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction= 'mean', weight=weight.to(device))
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=options['lr'], weight_decay=options['decay'])
+    optimizer = torch.optim.Adam(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
 
     # Learning Rate scheduler
     if options['reduce_lr_on_plateau']==1:
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10)
+        #Adaptative
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10) #  if the test loss doesn't improve for 10 consecutive evaluations, it reduces the LR
     else:
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1)
+        #Fixed scheduler
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1) # fixed changes of the learning rate
 
     # Start training
     start = options['resume_from_epoch'] + 1
@@ -203,24 +205,24 @@ def main(options):
                 image = image.to(device)
                 target = target.to(device)
 
-                optimizer.zero_grad()
+                optimizer.zero_grad() # resets the gradients
 
-                logits = model(image)
+                logits = model(image) #raw scores before softmax after the forward of the model
 
-                loss = criterion(logits, target)
+                loss = criterion(logits, target) #computes Categorical cross entropy
 
                 loss.backward()
 
                 training_batches += target.shape[0]
 
-                training_loss.append((loss.data*target.shape[0]).tolist())
+                training_loss.append((loss.data*target.shape[0]).tolist()) #un-averages the loss 
 
                 optimizer.step()
 
                 # Log running loss to wandb
                 wandb.log({'training_loss_step': loss.item()})
 
-            epoch_train_loss = sum(training_loss) / training_batches
+            epoch_train_loss = sum(training_loss) / training_batches # gives a correct weighted average across the whole epoch
             logging.info("Training loss was: " + str(epoch_train_loss))
 
             ###############################################################
@@ -245,24 +247,26 @@ def main(options):
 
                         loss = criterion(logits, target)
 
-                        # Accuracy metrics only on annotated pixels
-                        logits = torch.movedim(logits, (0,1,2,3), (0,3,1,2))
+                        # Accuracy metrics only on annotated pixels, not unlabeled ones (-1) meaningless for evaluation
+                        # reshapes and filters predictions to only evaluate on labeled pixels
+                        logits = torch.movedim(logits, (0,1,2,3), (0,3,1,2)) # from (batch, classes, H, W) to (batch, H, W, classes)
                         logits = logits.reshape((-1,options['output_channels']))
                         target = target.reshape(-1)
                         mask = target != -1
                         logits = logits[mask]
                         target = target[mask]
 
-                        probs = torch.nn.functional.softmax(logits, dim=1).cpu().numpy()
+                        
+                        probs = torch.nn.functional.softmax(logits, dim=1).cpu().numpy() #computes the softmax. need to move back to CPU because of evaluation metrics
                         target = target.cpu().numpy()
 
                         test_batches += target.shape[0]
                         test_loss.append((loss.data*target.shape[0]).tolist())
-                        y_predicted += probs.argmax(1).tolist()
-                        y_true += target.tolist()
+                        y_predicted += probs.argmax(1).tolist() #picks the highest probability, the predicted class
+                        y_true += target.tolist() # accumulates all predictions and true for evaluation when epoch finish
 
 
-                    y_predicted = np.asarray(y_predicted)
+                    y_predicted = np.asarray(y_predicted) #converstion required for sklearn metrics
                     y_true = np.asarray(y_true)
 
                     ####################################################################
