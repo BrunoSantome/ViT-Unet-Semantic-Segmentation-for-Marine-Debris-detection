@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 
-"Code from https://github.com/tamasino52/UNETR, used as reference"
+"Code from https://github.com/tamasino52/UNETR, used as reference to build the Decoder"
 
 
 class SingleDeconv3DBlock(nn.Module):

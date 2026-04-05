@@ -7,7 +7,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from utils.assets import S2_RGB_INDICES, MODEL_DEFAULT
 import math
-import torch.nn.functional as functional
+import torch.nn.functional as F
 
 def build_vit_encoder(in_chans=11, img_size=256, pretrained=True, rgb_indices=S2_RGB_INDICES, model=MODEL_DEFAULT):
     model = timm.create_model(model, pretrained=pretrained, img_size=img_size)
@@ -39,7 +39,6 @@ def build_vit_encoder(in_chans=11, img_size=256, pretrained=True, rgb_indices=S2
     # model.patch_embed.img_size = (img_size, img_size)     # (256, 256)
     # model.patch_embed.grid_size = (16, 16)  # (16, 16)
     # model.patch_embed.num_patches = 16 * 16  # 256
-    # (model, img_size)
     return model
 
 
@@ -62,7 +61,7 @@ def adapt_positional_embeddings(model, img_size):
     patch = patch.reshape(1, patch_vit_old_size, patch_vit_old_size, embed_dim) # From [1, 196, 768] to [1, 14,14, 768]: [batch, row, column, embedding]
     patch = patch.permute(0, 3, 1, 2) # From [batch, row, column, embedding] to [batch, channels, height, width] (format that interpolate expects) [N, C, H, W]
     
-    patch = functional.interpolate(patch, size=(patch_vit_new_size, patch_vit_new_size), mode='bicubic', align_corners=False) # try with others modes (bilinear)
+    patch = F.interpolate(patch, size=(patch_vit_new_size, patch_vit_new_size), mode='bicubic', align_corners=False) # try with others modes (bilinear)
     
     print(patch.shape) # torch.Size([1, 768, 16, 16])
     patch = patch.permute(0,2,3,1)
@@ -75,7 +74,8 @@ def adapt_positional_embeddings(model, img_size):
     model.pos_embed = nn.Parameter(pos_embed_new)
     
 
-#Encoder that build 
+################ Encoder ########################
+
 class VitEncoder(nn.Module):
     def __init__(self,  in_chans=11, img_size=256, pretrained=True, layers=(2, 5, 8, 11)):
         super().__init__()
@@ -87,6 +87,130 @@ class VitEncoder(nn.Module):
         extract_layers= self.vit.get_intermediate_layers(x, n=self.skip_connections_layers, reshape=True)
         return list(extract_layers)
         
+ 
+################## Decoder Blocks ################# 
+ 
+class SingleDeConv2DBlock(nn.Module):
+    def __init__(self, in_channel, out_channel):
+        super().__init__()
+        self.block = nn.ConvTranspose2d(in_channel, out_channel, kernel_size=2, stride=2, padding=0, output_padding=0)
+
+    def forward(self, x): 
+        return self.block(x)      
+
+
+class SingleConv2DBlock(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size):
+        super().__init__()
+        self.block = nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=1,
+                               padding=((kernel_size - 1) // 2)) #The padding is to keep the spatial size
+
+    def forward(self, x):
+        return self.block(x)  
+
+
+class Conv2DBlock(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=3):
+        super().__init__()
+        self.block = nn.Sequential(
+            SingleConv2DBlock(in_channel, out_channel, kernel_size),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True)
+        )
+
+    def forward(self, x):
+        return self.block(x)
+
+
+class Deconv2DBlock(nn.Module):
+    def __init__(self, in_channel, out_channel, kernel_size=3):
+        super().__init__()
+        self.block = nn.Sequential(
+            SingleDeConv2DBlock(in_channel, out_channel),
+            SingleConv2DBlock(out_channel, out_channel, kernel_size),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True)
+        )
+
+    def forward(self, x):
+        return self.block(x)
+
+
+################## Decoder ####################
+
+
+class Decoder(nn.Module):
+    def __init__(self, input_dim=11, output_dim=11,embed_dim=768):
+        super().__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.embed_dim = embed_dim
+        
+        self.decoder0 = \
+            nn.Sequential(
+                Conv2DBlock(input_dim,32,3),
+                Conv2DBlock(32,64,3)
+            )
+        
+        self.decoder3 = \
+            nn.Sequential(
+                Deconv2DBlock(embed_dim,512),
+                Deconv2DBlock(512, 256),
+                Deconv2DBlock(256, 128)
+            )
+            
+        self.decoder6 = \
+            nn.Sequential(
+                Deconv2DBlock(embed_dim, 512),
+                Deconv2DBlock(512, 256)
+            )
+        
+        self.decoder9 = Deconv2DBlock(embed_dim, 512)
+        
+        self.decoder12_upsampler = SingleDeConv2DBlock(embed_dim, 512)
+        
+        self.decoder9_upsampler = \
+            nn.Sequential(
+                Conv2DBlock(1024, 512),
+                Conv2DBlock(512, 512),
+                Conv2DBlock(512, 512),
+                SingleDeConv2DBlock(512, 256)
+            )
+
+        self.decoder6_upsampler = \
+            nn.Sequential(
+                Conv2DBlock(512, 256),
+                Conv2DBlock(256, 256),
+                SingleDeConv2DBlock(256, 128)
+            )
+
+        self.decoder3_upsampler = \
+            nn.Sequential(
+                Conv2DBlock(256, 128),
+                Conv2DBlock(128, 128),
+                SingleDeConv2DBlock(128, 64)
+            )
+
+        self.decoder0_header = \
+            nn.Sequential(
+                Conv2DBlock(128, 64),
+                Conv2DBlock(64, 64),
+                SingleConv2DBlock(64, output_dim, 1)
+            )
+    
+    def forward(self, x, encoder_layers):
+        z0, z3, z6, z9, z12 = x, *encoder_layers
+        
+        z12 = self.decoder12_upsampler(z12)
+        z9 = self.decoder9(z9)
+        z9 = self.decoder9_upsampler(torch.cat([z9, z12], dim=1))
+        z6 = self.decoder6(z6)
+        z6 = self.decoder6_upsampler(torch.cat([z6, z9], dim=1))
+        z3 = self.decoder3(z3)
+        z3 = self.decoder3_upsampler(torch.cat([z3, z6], dim=1))
+        z0 = self.decoder0(z0)
+        output = self.decoder0_header(torch.cat([z0, z3], dim=1))
+        return output
         
     
 
@@ -96,7 +220,7 @@ if __name__ == "__main__":
     print("Patch embedding after surgery:")
     print(model.patch_embed.proj) #Conv2d(3, 768, kernel_size=(16, 16), stride=(16, 16))
     print("Weight shape:", model.patch_embed.proj.weight.shape)
-   
+    #print(model) to view the whole model architecture
     # dummy = torch.randn(2, 11, 224, 224)
     # out = model.forward_features(dummy)
     # print("ViT feature output shape:", out.shape) #  torch.Size([2, 197, 768]): 2 batch size, 224/16=14, 14x14=196 + CLS token for transformers= 197
@@ -107,6 +231,7 @@ if __name__ == "__main__":
     
     print("ViT feature output shape:", out.shape)   
     extract_layers = model.get_intermediate_layers(dummy, n=[2, 5, 8, 11], reshape=True) #timm manages the permutation and reshape for me, no need to do it manually.
+    
     print(len(extract_layers))
     for i, f in enumerate(extract_layers):
           print(f"  Layer {[2,5,8,11][i]+1}: shape={f.shape}")
@@ -119,5 +244,6 @@ if __name__ == "__main__":
     
     CLS token not included. 
     """
+
           
    
