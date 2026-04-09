@@ -84,7 +84,9 @@ def main(options):
 
     transform_train = transforms.Compose([transforms.ToTensor(),
                                     RandomRotationTransform([-90, 0, 90, 180]),
-                                    transforms.RandomHorizontalFlip()])
+                                    transforms.RandomHorizontalFlip(),
+                                    transforms.RandomVerticalFlip()
+                                    ])
 
     transform_test = transforms.Compose([transforms.ToTensor()])
 
@@ -282,12 +284,15 @@ def main(options):
                     logging.info("Test loss was: " + str(epoch_test_loss))
                     logging.info("STATISTICS AFTER EPOCH " +str(epoch) + ": \n")
                     logging.info("Evaluation: " + str(acc))
-
-
                     logging.info("Saving models")
-                    model_dir = os.path.join(options['checkpoint_path'], str(epoch))
-                    os.makedirs(model_dir, exist_ok=True)
-                    torch.save(model.state_dict(), os.path.join(model_dir, 'model.pth'))
+                    # model_dir = os.path.join(options['checkpoint_path'], str(epoch))
+                    checkpoint_path = options['checkpoint_path'] #only save specific checkpoints, not 1 per epoch
+                    os.makedirs(checkpoint_path, exist_ok=True)
+                    if acc["macroF1"] > best_f1:
+                        best_f1 = acc["macroF1"] # we focus on macro F1 to save a checkpoint over another
+                        torch.save(model.state_dict(), os.path.join(checkpoint_path, 'best_model.pth'))
+
+                    torch.save(model.state_dict(), os.path.join(checkpoint_path, 'last_model.pth'))
 
                     # Log epoch-level metrics to wandb
                     wandb.log({
@@ -373,8 +378,8 @@ if __name__ == "__main__":
     parser.add_argument('--agg_to_water', default=True, type=bool,  help='Aggregate Mixed Water, Wakes, Cloud Shadows, Waves with Marine Water')
 
     parser.add_argument('--mode', default='train', help='select between train or test ')
-    parser.add_argument('--epochs', default=45, type=int, help='Number of epochs to run')
-    parser.add_argument('--batch', default=5, type=int, help='Batch size')
+    parser.add_argument('--epochs', default=10, type=int, help='Number of epochs to run')
+    parser.add_argument('--batch', default=4, type=int, help='Batch size')
     parser.add_argument('--resume_from_epoch', default=0, type=int, help='load model from previous epoch')
 
     parser.add_argument('--img_size', default=256, type=int,help='The size (resolution) of the input images')
@@ -385,7 +390,7 @@ if __name__ == "__main__":
     parser.add_argument('--weight_param', default=1.03, type=float, help='Weighting parameter for Loss Function')
 
     # Optimization (tune with experiments)
-    parser.add_argument('--lr', default=1e-4, type=float, help='learning rate')
+    parser.add_argument('--lr', default=1e-5, type=float, help='learning rate')
     parser.add_argument('--decay', default=1e-4, type=float, help='learning rate decay')
     parser.add_argument('--reduce_lr_on_plateau', default=0, type=int, help='reduce learning rate when no increase (0 or 1)')
     parser.add_argument('--lr_steps', default='[40]', type=str, help='Specify the steps that the lr will be reduced')
