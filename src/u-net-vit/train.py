@@ -288,6 +288,7 @@ def main(options):
                     # model_dir = os.path.join(options['checkpoint_path'], str(epoch))
                     checkpoint_path = options['checkpoint_path'] #only save specific checkpoints, not 1 per epoch
                     os.makedirs(checkpoint_path, exist_ok=True)
+                    best_f1=0
                     if acc["macroF1"] > best_f1:
                         best_f1 = acc["macroF1"] # we focus on macro F1 to save a checkpoint over another
                         torch.save(model.state_dict(), os.path.join(checkpoint_path, 'best_model.pth'))
@@ -389,7 +390,7 @@ if __name__ == "__main__":
     parser.add_argument('--output_channels', default=11, type=int, help='Number of output classes')
     parser.add_argument('--weight_param', default=1.03, type=float, help='Weighting parameter for Loss Function')
 
-    # Optimization (tune with experiments)
+    # Optimization (tune with experiments) 
     parser.add_argument('--lr', default=1e-5, type=float, help='learning rate')
     parser.add_argument('--decay', default=1e-4, type=float, help='learning rate decay')
     parser.add_argument('--reduce_lr_on_plateau', default=0, type=int, help='reduce learning rate when no increase (0 or 1)')
