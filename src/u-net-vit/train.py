@@ -84,8 +84,8 @@ def main(options):
 
     transform_train = transforms.Compose([transforms.ToTensor(),
                                     RandomRotationTransform([-90, 0, 90, 180]),
-                                    transforms.RandomHorizontalFlip()
-                                    #transforms.RandomVerticalFlip()
+                                    transforms.RandomHorizontalFlip(),
+                                    transforms.RandomVerticalFlip()
                                     ])
 
     transform_test = transforms.Compose([transforms.ToTensor()])
