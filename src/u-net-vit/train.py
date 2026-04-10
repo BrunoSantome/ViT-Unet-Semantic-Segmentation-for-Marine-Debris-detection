@@ -84,8 +84,8 @@ def main(options):
 
     transform_train = transforms.Compose([transforms.ToTensor(),
                                     RandomRotationTransform([-90, 0, 90, 180]),
-                                    transforms.RandomHorizontalFlip(),
-                                    transforms.RandomVerticalFlip()
+                                    transforms.RandomHorizontalFlip()
+                                    #transforms.RandomVerticalFlip()
                                     ])
 
     transform_test = transforms.Compose([transforms.ToTensor()])
@@ -178,8 +178,8 @@ def main(options):
     weight = gen_weights(class_distr, c = options['weight_param']) #handles class imbalance
     criterion = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction= 'mean', weight=weight.to(device))
 
-    #optimizer = torch.optim.Adam(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
-    optimizer = torch.optim.AdamW(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
+    optimizer = torch.optim.Adam(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
+    #optimizer = torch.optim.AdamW(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
     # Learning Rate scheduler
     if options['reduce_lr_on_plateau']==1:
         #Adaptative
@@ -380,7 +380,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--mode', default='train', help='select between train or test ')
     parser.add_argument('--epochs', default=10, type=int, help='Number of epochs to run')
-    parser.add_argument('--batch', default=4, type=int, help='Batch size')
+    parser.add_argument('--batch', default=5, type=int, help='Batch size')
     parser.add_argument('--resume_from_epoch', default=0, type=int, help='load model from previous epoch')
 
     parser.add_argument('--img_size', default=256, type=int,help='The size (resolution) of the input images')
@@ -391,8 +391,8 @@ if __name__ == "__main__":
     parser.add_argument('--weight_param', default=1.03, type=float, help='Weighting parameter for Loss Function')
 
     # Optimization (tune with experiments) 
-    parser.add_argument('--lr', default=1e-5, type=float, help='learning rate')
-    parser.add_argument('--decay', default=1e-4, type=float, help='learning rate decay')
+    parser.add_argument('--lr', default=2e-4, type=float, help='learning rate')
+    parser.add_argument('--decay', default=0, type=float, help='learning rate decay')
     parser.add_argument('--reduce_lr_on_plateau', default=0, type=int, help='reduce learning rate when no increase (0 or 1)')
     parser.add_argument('--lr_steps', default='[40]', type=str, help='Specify the steps that the lr will be reduced')
 
@@ -400,7 +400,7 @@ if __name__ == "__main__":
     parser.add_argument('--checkpoint_path', default='checkpoints', help='folder to save vit Unet checkpoints into')
     parser.add_argument('--eval_every', default=1, type=int, help='How frequently to run evaluation (epochs)')
 
-    # misc
+    # misc3
     parser.add_argument('--num_workers', default=1, type=int, help='How many cpus for loading data (0 is the main process)')
     parser.add_argument('--pin_memory', default=False, type=bool, help='Use pinned memory or not')
     parser.add_argument('--prefetch_factor', default=1, type=int, help='Number of sample loaded in advance by each worker')
