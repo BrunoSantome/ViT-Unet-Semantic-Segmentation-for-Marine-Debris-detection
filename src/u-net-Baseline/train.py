@@ -200,7 +200,7 @@ def main(options):
             training_loss = []
             training_batches = 0
 
-            for (image, target) in tqdm(train_loader, desc="training"):
+            for (image, target) in tqdm(train_loader, desc=f"training epoch {epoch}/{epochs}"):
 
                 image = image.to(device)
                 target = target.to(device)

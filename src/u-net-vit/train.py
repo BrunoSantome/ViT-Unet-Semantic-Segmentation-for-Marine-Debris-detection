@@ -178,8 +178,8 @@ def main(options):
     weight = gen_weights(class_distr, c = options['weight_param']) #handles class imbalance
     criterion = torch.nn.CrossEntropyLoss(ignore_index=-1, reduction= 'mean', weight=weight.to(device))
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
-    #optimizer = torch.optim.AdamW(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
+    #optimizer = torch.optim.Adam(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
+    optimizer = torch.optim.AdamW(model.parameters(), lr=options['lr'], weight_decay=options['decay']) # weight_decay ==> L2 regularisation
     # Learning Rate scheduler
     if options['reduce_lr_on_plateau']==1:
         #Adaptative
@@ -205,7 +205,7 @@ def main(options):
             training_loss = []
             training_batches = 0
 
-            for (image, target) in tqdm(train_loader, desc="training"):
+            for (image, target) in tqdm(train_loader, desc=f"training epoch {epoch}/{epochs}"):
 
                 image = image.to(device)
                 target = target.to(device)
