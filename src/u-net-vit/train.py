@@ -43,6 +43,8 @@ import wandb
 from vit_unet import VitUnet
 from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform , class_distr, gen_weights
 from utils.metrics import Evaluation
+from sklearn.metrics import f1_score, jaccard_score, precision_score, recall_score
+from utils.assets import labels_agg
 
 logging.basicConfig(filename=os.path.join('logs','log_vit_unet.log'), filemode='a',level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logging.info('*'*10)
@@ -294,8 +296,19 @@ def main(options):
                         torch.save(model.state_dict(), os.path.join(checkpoint_path, 'best_model.pth'))
 
                     torch.save(model.state_dict(), os.path.join(checkpoint_path, 'last_model.pth'))
-
+                    per_class_f1 = f1_score(y_true, y_predicted, average=None, zero_division=0)
+                    per_class_iou = jaccard_score(y_true, y_predicted, average=None, zero_division=0)
+                    per_class_prec = precision_score(y_true, y_predicted, average=None, zero_division=0)
+                    per_class_rec = recall_score(y_true, y_predicted, average=None, zero_division=0)
+                    
+                    per_class_log = {}
+                    for i, label in enumerate(labels_agg):
+                        per_class_log[f'F1_per_class/{label}'] = per_class_f1[i]
+                        per_class_log[f'IoU_per_class/{label}'] = per_class_iou[i]
+                        per_class_log[f'Precision_per_class/{label}'] = per_class_prec[i]
+                        per_class_log[f'Recall_per_class/{label}'] = per_class_rec[i]
                     # Log epoch-level metrics to wandb
+                    wandb.log(per_class_log)
                     wandb.log({
                         'epoch': epoch,
                         'train_loss': epoch_train_loss,

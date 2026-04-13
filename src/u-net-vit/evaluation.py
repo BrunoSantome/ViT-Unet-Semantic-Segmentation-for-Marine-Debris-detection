@@ -188,7 +188,7 @@ if __name__ == "__main__":
     parser.add_argument('--hidden_channels', default=16, type=int, help='Number of hidden features')
 
     # Unet model path
-    parser.add_argument('--model_path', default=os.path.join('checkpoints', '44', 'model.pth'), help='Path to Unet pytorch model')
+    parser.add_argument('--model_path', default=os.path.join('checkpoints', '44', 'model.pth'), help='Path to Vit-Unet pytorch model')
 
     # Produce Predicted Masks
     parser.add_argument('--predict_masks', default= True, type=bool, help='Generate test set prediction masks?')
