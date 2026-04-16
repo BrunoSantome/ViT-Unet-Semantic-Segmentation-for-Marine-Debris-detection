@@ -41,7 +41,7 @@ from torch.utils.data import DataLoader
 import wandb
 
 from vit_unet import VitUnet
-from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform , class_distr, gen_weightsdom
+from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform , class_distr, gen_weights
 from utils.metrics import Evaluation
 from sklearn.metrics import f1_score, jaccard_score, precision_score, recall_score
 from utils.assets import labels_agg
