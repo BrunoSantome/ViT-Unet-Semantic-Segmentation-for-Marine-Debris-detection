@@ -71,6 +71,7 @@ def seed_all(seed):
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    #torch.use_deterministic_algorithms(True, warn_only=True)
 
 def seed_worker(worker_id):
     # DataLoader Workers Reproducibility
@@ -102,7 +103,7 @@ def main(options):
                                     RandomRotationTransform([-90, 0, 90, 180]),
                                     transforms.RandomHorizontalFlip(),
                                     transforms.RandomVerticalFlip(),
-                                    #transforms.RandomResizedCrop(size=256, scale=(0.7, 1.0), antialias=True) 
+                                    transforms.RandomResizedCrop(size=256, scale=(0.7, 1.0), antialias=True) 
                                     # SpectralJitter(brightness=0.1, contrast=0.1, p=0.5),
                                     ])
 
