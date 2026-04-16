@@ -41,14 +41,26 @@ from torch.utils.data import DataLoader
 import wandb
 
 from vit_unet import VitUnet
-from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform , class_distr, gen_weights
+from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform , class_distr, gen_weightsdom
 from utils.metrics import Evaluation
 from sklearn.metrics import f1_score, jaccard_score, precision_score, recall_score
 from utils.assets import labels_agg
-from torch.optim.lr_scheduler import SequentialLR, LinearLR, CosineAnnealingLR
+# from torch.optim.lr_scheduler import SequentialLR, LinearLR, CosineAnnealingLR
 
 logging.basicConfig(filename=os.path.join('logs','log_vit_unet.log'), filemode='a',level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logging.info('*'*10)
+
+# class SpectralJitter:
+#     def __init__(self, brightness=0.1, contrast=0.1, p=0.5):
+#         self.b, self.c, self.p = brightness, contrast, p
+#     def __call__(self, x):
+#         if torch.rand(1).item() < self.p:
+#             C = x.shape[0]
+#             bright = 1.0 + (torch.rand(C, 1, 1) * 2 - 1) * self.b
+#             contr  = 1.0 + (torch.rand(C, 1, 1) * 2 - 1) * self.c
+#             mean = x.mean(dim=(1, 2), keepdim=True)
+#             x = (x - mean) * contr + mean * bright
+#         return x
 
 def seed_all(seed):
     # Pytorch Reproducibility
@@ -89,7 +101,10 @@ def main(options):
     transform_train = transforms.Compose([transforms.ToTensor(),
                                     RandomRotationTransform([-90, 0, 90, 180]),
                                     transforms.RandomHorizontalFlip(),
-                                    transforms.RandomVerticalFlip()
+                                    transforms.RandomVerticalFlip(),
+                                    transforms.RandomResizedCrop(size=256, scale=(0.7, 1.0), antialias=True)
+                                    
+                                    # SpectralJitter(brightness=0.1, contrast=0.1, p=0.5),
                                     ])
 
     transform_test = transforms.Compose([transforms.ToTensor()])
@@ -305,11 +320,11 @@ def main(options):
                         torch.save(model.state_dict(), os.path.join(f"{checkpoint_path}/{options['run_name']}", 'best_model.pth'))
 
                     torch.save(model.state_dict(), os.path.join(f"{checkpoint_path}/{options['run_name']}", 'last_model.pth'))
-                    artifact = wandb.Artifact(
-                        name=f"model-{wandb.run.name}",
-                        type='model',
-                        metadata={'epoch': epoch, 'macroF1': acc["macroF1"]}
-                    )
+                    # artifact = wandb.Artifact(
+                    #     name=f"model-{wandb.run.name}",
+                    #     type='model',
+                    #     metadata={'epoch': epoch, 'macroF1': acc["macroF1"]}
+                    # )
                     #artifact.add_file(os.path.join(run_dir, 'best_model.pth'))
                     #wandb.log_artifact(artifact, aliases=['best'])
                     
