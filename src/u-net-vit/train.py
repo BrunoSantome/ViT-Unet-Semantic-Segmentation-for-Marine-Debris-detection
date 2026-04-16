@@ -45,6 +45,7 @@ from dataloader import GenDEBRIS, bands_mean, bands_std, RandomRotationTransform
 from utils.metrics import Evaluation
 from sklearn.metrics import f1_score, jaccard_score, precision_score, recall_score
 from utils.assets import labels_agg
+from torch.optim.lr_scheduler import SequentialLR, LinearLR, CosineAnnealingLR
 
 logging.basicConfig(filename=os.path.join('logs','log_vit_unet.log'), filemode='a',level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logging.info('*'*10)
@@ -79,6 +80,7 @@ def main(options):
     # Wandb (replaces tensorboard)
     wandb.init(
         project=options['wandb_project'],
+        name=options['run_name'],
         config=options,
     )
 
@@ -187,8 +189,12 @@ def main(options):
         #Adaptative
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10) #  if the test loss doesn't improve for 10 consecutive evaluations, it reduces the LR
     else:
-        #Fixed scheduler
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1) # fixed changes of the learning rate
+        #Fixed scheduler Changed from MultiStepLR
+        warmup_epochs = options['warmup_steps']
+        warmup = LinearLR(optimizer, start_factor=0.01, end_factor=1.0, total_iters=warmup_epochs)
+        cosine = CosineAnnealingLR(optimizer, T_max=options['epochs'] - warmup_epochs, eta_min=1e-6)
+        scheduler = SequentialLR(optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
+        #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1) # fixed changes of the learning rate
 
     # Start training
     start = options['resume_from_epoch'] + 1
@@ -202,7 +208,7 @@ def main(options):
         # Start Training                                              #
         ###############################################################
         model.train()
-
+        best_f1=0
         for epoch in range(start, epochs+1):
             training_loss = []
             training_batches = 0
@@ -290,12 +296,21 @@ def main(options):
                     # model_dir = os.path.join(options['checkpoint_path'], str(epoch))
                     checkpoint_path = options['checkpoint_path'] #only save specific checkpoints, not 1 per epoch
                     os.makedirs(checkpoint_path, exist_ok=True)
-                    best_f1=0
+                    
+                   
                     if acc["macroF1"] > best_f1:
                         best_f1 = acc["macroF1"] # we focus on macro F1 to save a checkpoint over another
-                        torch.save(model.state_dict(), os.path.join(checkpoint_path, 'best_model.pth'))
+                        torch.save(model.state_dict(), os.path.join(f'{checkpoint_path}/{options['run_name']}', 'best_model.pth'))
 
-                    torch.save(model.state_dict(), os.path.join(checkpoint_path, 'last_model.pth'))
+                    torch.save(model.state_dict(), os.path.join(f'{checkpoint_path}/{options['run_name']}', 'last_model.pth'))
+                    artifact = wandb.Artifact(
+                        name=f"model-{wandb.run.name}",
+                        type='model',
+                        metadata={'epoch': epoch, 'macroF1': acc["macroF1"]}
+                    )
+                    artifact.add_file('best_model.pth')
+                    wandb.log_artifact(artifact, aliases=['best'])
+                    
                     per_class_f1 = f1_score(y_true, y_predicted, average=None, zero_division=0)
                     per_class_iou = jaccard_score(y_true, y_predicted, average=None, zero_division=0)
                     per_class_prec = precision_score(y_true, y_predicted, average=None, zero_division=0)
@@ -403,12 +418,13 @@ if __name__ == "__main__":
     parser.add_argument('--output_channels', default=11, type=int, help='Number of output classes')
     parser.add_argument('--weight_param', default=1.03, type=float, help='Weighting parameter for Loss Function')
 
+    
     # Optimization (tune with experiments) 
     parser.add_argument('--lr', default=2e-4, type=float, help='learning rate')
     parser.add_argument('--decay', default=0, type=float, help='learning rate decay')
     parser.add_argument('--reduce_lr_on_plateau', default=0, type=int, help='reduce learning rate when no increase (0 or 1)')
     parser.add_argument('--lr_steps', default='[40]', type=str, help='Specify the steps that the lr will be reduced')
-
+    parser.add_argument('--warmup_steps', default=3, type=int, help='Specify the steps that the learning rate will warmup')
     # Evaluation/Checkpointing
     parser.add_argument('--checkpoint_path', default='checkpoints', help='folder to save vit Unet checkpoints into')
     parser.add_argument('--eval_every', default=1, type=int, help='How frequently to run evaluation (epochs)')
@@ -419,6 +435,7 @@ if __name__ == "__main__":
     parser.add_argument('--prefetch_factor', default=1, type=int, help='Number of sample loaded in advance by each worker')
     parser.add_argument('--persistent_workers', default=True, type=bool, help='This allows to maintain the workers Dataset instances alive.')
     parser.add_argument('--wandb_project', default='vit-Unet marida-segmentation', type=str, help='Wandb project name')
+    parser.add_argument('--run_name', default=None, type=str, help='wandb run name (else random)')
     parser.add_argument('--data_path', default='data', type=str, help='Path to MARIDA dataset root')
 
     args = parser.parse_args()
