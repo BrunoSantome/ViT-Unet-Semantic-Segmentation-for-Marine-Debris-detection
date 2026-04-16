@@ -310,8 +310,8 @@ def main(options):
                         type='model',
                         metadata={'epoch': epoch, 'macroF1': acc["macroF1"]}
                     )
-                    artifact.add_file('best_model.pth')
-                    wandb.log_artifact(artifact, aliases=['best'])
+                    #artifact.add_file(os.path.join(run_dir, 'best_model.pth'))
+                    #wandb.log_artifact(artifact, aliases=['best'])
                     
                     per_class_f1 = f1_score(y_true, y_predicted, average=None, zero_division=0)
                     per_class_iou = jaccard_score(y_true, y_predicted, average=None, zero_division=0)
