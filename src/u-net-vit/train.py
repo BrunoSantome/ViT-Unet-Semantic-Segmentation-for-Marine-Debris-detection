@@ -190,11 +190,11 @@ def main(options):
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10) #  if the test loss doesn't improve for 10 consecutive evaluations, it reduces the LR
     else:
         #Fixed scheduler Changed from MultiStepLR
-        warmup_epochs = options['warmup_steps']
-        warmup = LinearLR(optimizer, start_factor=0.01, end_factor=1.0, total_iters=warmup_epochs)
-        cosine = CosineAnnealingLR(optimizer, T_max=options['epochs'] - warmup_epochs, eta_min=1e-6)
-        scheduler = SequentialLR(optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
-        #scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1) # fixed changes of the learning rate
+        # warmup_epochs = options['warmup_steps']
+        # warmup = LinearLR(optimizer, start_factor=0.01, end_factor=1.0, total_iters=warmup_epochs)
+        # cosine = CosineAnnealingLR(optimizer, T_max=options['epochs'] - warmup_epochs, eta_min=1e-6)
+        # scheduler = SequentialLR(optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, options['lr_steps'], gamma=0.1) # fixed changes of the learning rate
 
     # Start training
     start = options['resume_from_epoch'] + 1
