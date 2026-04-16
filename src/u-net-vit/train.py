@@ -102,8 +102,7 @@ def main(options):
                                     RandomRotationTransform([-90, 0, 90, 180]),
                                     transforms.RandomHorizontalFlip(),
                                     transforms.RandomVerticalFlip(),
-                                    transforms.RandomResizedCrop(size=256, scale=(0.7, 1.0), antialias=True)
-                                    
+                                    #transforms.RandomResizedCrop(size=256, scale=(0.7, 1.0), antialias=True) 
                                     # SpectralJitter(brightness=0.1, contrast=0.1, p=0.5),
                                     ])
 
