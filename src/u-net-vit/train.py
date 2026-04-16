@@ -294,15 +294,17 @@ def main(options):
                     logging.info("Evaluation: " + str(acc))
                     logging.info("Saving models")
                     # model_dir = os.path.join(options['checkpoint_path'], str(epoch))
-                    checkpoint_path = options['checkpoint_path'] #only save specific checkpoints, not 1 per epoch
-                    os.makedirs(checkpoint_path, exist_ok=True)
+                    checkpoint_path = options['checkpoint_path']
+                    run_dir = os.path.join(checkpoint_path, options['run_name'])
+                     #only save specific checkpoints, not 1 per epoch
+                    os.makedirs(run_dir, exist_ok=True)
                     
                    
                     if acc["macroF1"] > best_f1:
                         best_f1 = acc["macroF1"] # we focus on macro F1 to save a checkpoint over another
-                        torch.save(model.state_dict(), os.path.join(f'{checkpoint_path}/{options['run_name']}', 'best_model.pth'))
+                        torch.save(model.state_dict(), os.path.join(f"{checkpoint_path}/{options['run_name']}", 'best_model.pth'))
 
-                    torch.save(model.state_dict(), os.path.join(f'{checkpoint_path}/{options['run_name']}', 'last_model.pth'))
+                    torch.save(model.state_dict(), os.path.join(f"{checkpoint_path}/{options['run_name']}", 'last_model.pth'))
                     artifact = wandb.Artifact(
                         name=f"model-{wandb.run.name}",
                         type='model',
