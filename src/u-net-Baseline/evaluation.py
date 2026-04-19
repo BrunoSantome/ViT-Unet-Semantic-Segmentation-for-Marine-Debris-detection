@@ -199,7 +199,7 @@ if __name__ == "__main__":
     parser.add_argument('--model_path', default=os.path.join('checkpoints', '44', 'model.pth'), help='Path to Unet pytorch model')
 
     # Produce Predicted Masks
-    parser.add_argument('--predict_masks', default= True, type=bool, help='Generate test set prediction masks?')
+    parser.add_argument('--predict_masks', default= False, type=bool, help='Generate test set prediction masks?')
     parser.add_argument('--gen_masks_path', default=os.path.join('data', 'predicted_unet'), help='Path to where to produce store predictions')
 
     args = parser.parse_args()
