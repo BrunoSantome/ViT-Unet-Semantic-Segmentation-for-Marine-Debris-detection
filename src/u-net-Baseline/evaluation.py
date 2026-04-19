@@ -23,6 +23,8 @@ import rasterio  #Python-friendly wrapper around GDAL for raster data
 import argparse
 import numpy as np
 from tqdm import tqdm
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import torch
 from torch.utils.data import DataLoader
@@ -48,8 +50,11 @@ def main(options):
 
     # Construct Data loader
 
-    dataset_test = GenDEBRIS('test', transform=transform_test, standardization = standardization, agg_to_water = options['agg_to_water'])
-
+    dataset_test = GenDEBRIS('test', transform=transform_test,
+                           standardization=standardization,
+                           path=options['data_path'],
+                           agg_to_water=options['agg_to_water'])
+      
     test_loader = DataLoader(   dataset_test,
                                 batch_size = options['batch'],
                                 shuffle = False)
@@ -189,6 +194,7 @@ if __name__ == "__main__":
     parser.add_argument('--output_channels', default=11, type=int, help='Number of output classes')
     parser.add_argument('--hidden_channels', default=16, type=int, help='Number of hidden features')
 
+    parser.add_argument('--data_path', default='data', type=str, help='Path to MARIDA dataset root')
     # Unet model path
     parser.add_argument('--model_path', default=os.path.join('checkpoints', '44', 'model.pth'), help='Path to Unet pytorch model')
 
