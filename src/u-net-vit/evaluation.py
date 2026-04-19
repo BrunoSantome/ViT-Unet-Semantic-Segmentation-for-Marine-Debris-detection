@@ -126,7 +126,7 @@ def main(options):
         if options['predict_masks']:
 
             path = os.path.join(options['data_path'], 'patches')
-            ROIs = np.genfromtxt(os.path.join(options['data_path']), 'splits', 'test_X.txt'),dtype='str')
+            ROIs = np.genfromtxt(os.path.join(options['data_path'], 'splits', 'test_X.txt'),dtype='str')
 
             impute_nan = np.tile(bands_mean, (256,256,1))
 
