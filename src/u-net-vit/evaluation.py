@@ -22,12 +22,13 @@ import rasterio  #Python-friendly wrapper around GDAL for raster data
 import argparse
 import numpy as np
 from tqdm import tqdm
-
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 
-from unet import UNet
+from vit_unet import VitUnet
 from dataloader import GenDEBRIS, bands_mean, bands_std
 from utils.metrics import Evaluation, confusion_matrix
 from utils.assets import labels
@@ -36,7 +37,7 @@ random.seed(0)
 np.random.seed(0)
 torch.manual_seed(0)
 
-logging.basicConfig(filename=os.path.join('logs','evaluating_unet.log'), filemode='a',level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=os.path.join('logs','evaluating_vit_unet.log'), filemode='a',level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logging.info('*'*10)
 
 def main(options):
@@ -47,7 +48,7 @@ def main(options):
 
     # Construct Data loader
 
-    dataset_test = GenDEBRIS('test', transform=transform_test, standardization = standardization, agg_to_water = options['agg_to_water'])
+    dataset_test = GenDEBRIS('test', transform=transform_test, standardization = standardization, path = options['data_path'], agg_to_water = options['agg_to_water'])
 
     test_loader = DataLoader(   dataset_test,
                                 batch_size = options['batch'],
@@ -64,10 +65,12 @@ def main(options):
     else:
         device = torch.device("cpu")
 
-    model = UNet(input_bands = options['input_channels'],
-                 output_classes = options['output_channels'],
-                 hidden_channels = options['hidden_channels'])
-
+    model = VitUnet(    
+        in_channel=options['input_channels'],
+        num_classes=options['output_channels'],
+        img_size=options['img_size'],
+        pretrained=options['pretrained'],
+  )
     model.to(device)
 
     # Load model from specific epoch to continue the training or start the evaluation
@@ -122,8 +125,8 @@ def main(options):
 
         if options['predict_masks']:
 
-            path = os.path.join('data', 'patches')
-            ROIs = np.genfromtxt(os.path.join('data', 'splits', 'test_X.txt'),dtype='str')
+            path = os.path.join(options['data_path'], 'patches')
+            ROIs = np.genfromtxt(os.path.join(options['data_path']), 'splits', 'test_X.txt'),dtype='str')
 
             impute_nan = np.tile(bands_mean, (256,256,1))
 
@@ -135,7 +138,7 @@ def main(options):
 
                 os.makedirs(options['gen_masks_path'], exist_ok=True)
 
-                output_image = os.path.join(options['gen_masks_path'], os.path.basename(roi_file).split('.tif')[0] + '_unet.tif')
+                output_image = os.path.join(options['gen_masks_path'], os.path.basename(roi_file).split('.tif')[0] + '_vitunet.tif')
 
                 # Read metadata of the initial image
                 with rasterio.open(roi_file, mode ='r') as src:
@@ -180,18 +183,23 @@ if __name__ == "__main__":
     # Options
     parser.add_argument('--agg_to_water', default=True, type=bool,  help='Aggregate Mixed Water, Wakes, Cloud Shadows, Waves with Marine Water')
 
-    parser.add_argument('--batch', default=5, type=int, help='Number of epochs to run')
+    parser.add_argument('--batch', default=5, type=int, help='batch size')
 
     # Unet parameters
     parser.add_argument('--input_channels', default=11, type=int, help='Number of input bands')
     parser.add_argument('--output_channels', default=11, type=int, help='Number of output classes')
-    parser.add_argument('--hidden_channels', default=16, type=int, help='Number of hidden features')
+    #parser.add_argument('--hidden_channels', default=16, type=int, help='Number of hidden features')
 
+    parser.add_argument('--img_size', default=256, type=int,help='The size (resolution) of the input images')
+    parser.add_argument('--pretrained', default=False, type=bool,help='Whether to use the pre-trained weights for the RGB bands or not')
+    parser.add_argument('--data_path', default='data', type=str, help='Path to MARIDA dataset root')
+
+   
     # Unet model path
-    parser.add_argument('--model_path', default=os.path.join('checkpoints', '44', 'model.pth'), help='Path to Vit-Unet pytorch model')
+    parser.add_argument('--model_path', default=os.path.join('checkpoints', 'run-decay-lr2e-4-batch16-epochs-60-REPRODUCIBLE', 'best_model.pth'), help='Path to Vit-Unet pytorch model')
 
     # Produce Predicted Masks
-    parser.add_argument('--predict_masks', default= True, type=bool, help='Generate test set prediction masks?')
+    parser.add_argument('--predict_masks', default= False, type=bool, help='Generate test set prediction masks?')
     parser.add_argument('--gen_masks_path', default=os.path.join('data', 'predicted_unet'), help='Path to where to produce store predictions')
 
     args = parser.parse_args()
