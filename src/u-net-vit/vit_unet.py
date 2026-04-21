@@ -241,7 +241,7 @@ if __name__ == "__main__":
     # dummy = torch.randn(2, 11, 224, 224)
     # out = model.forward_features(dummy)
     # print("ViT feature output shape:", out.shape) #  torch.Size([2, 197, 768]): 2 batch size, 224/16=14, 14x14=196 + CLS token for transformers= 197
-    # todo: we need to feed 256x256 ==> Original ViT accepts 224 images so 14x14 positional embeddings we need 16x16
+    # 
     
     dummy = torch.randn(2, 11, 256, 256)
     out = model.forward_features(dummy)
