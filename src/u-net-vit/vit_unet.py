@@ -231,41 +231,41 @@ class VitUnet(nn.Module):
         return logits
         
 
-if __name__ == "__main__":
-    model = build_vit_encoder(in_chans=11)
+# if __name__ == "__main__":
+#     model = build_vit_encoder(in_chans=11)
 
-    print("Patch embedding after surgery:")
-    print(model.patch_embed.proj) #Conv2d(3, 768, kernel_size=(16, 16), stride=(16, 16))
-    print("Weight shape:", model.patch_embed.proj.weight.shape)
-    #print(model) to view the whole model architecture
-    # dummy = torch.randn(2, 11, 224, 224)
-    # out = model.forward_features(dummy)
-    # print("ViT feature output shape:", out.shape) #  torch.Size([2, 197, 768]): 2 batch size, 224/16=14, 14x14=196 + CLS token for transformers= 197
-    # 
+#     print("Patch embedding after surgery:")
+#     print(model.patch_embed.proj) #Conv2d(3, 768, kernel_size=(16, 16), stride=(16, 16))
+#     print("Weight shape:", model.patch_embed.proj.weight.shape)
+#     #print(model) to view the whole model architecture
+#     # dummy = torch.randn(2, 11, 224, 224)
+#     # out = model.forward_features(dummy)
+#     # print("ViT feature output shape:", out.shape) #  torch.Size([2, 197, 768]): 2 batch size, 224/16=14, 14x14=196 + CLS token for transformers= 197
+#     # 
     
-    dummy = torch.randn(2, 11, 256, 256)
-    out = model.forward_features(dummy)
+#     dummy = torch.randn(2, 11, 256, 256)
+#     out = model.forward_features(dummy)
     
-    print("ViT feature output shape:", out.shape)   
-    extract_layers = model.get_intermediate_layers(dummy, n=[2, 5, 8, 11], reshape=True) #timm manages the permutation and reshape for me, no need to do it manually.
+#     print("ViT feature output shape:", out.shape)   
+#     extract_layers = model.get_intermediate_layers(dummy, n=[2, 5, 8, 11], reshape=True) #timm manages the permutation and reshape for me, no need to do it manually.
     
-    print(len(extract_layers))
-    for i, f in enumerate(extract_layers):
-          print(f"  Layer {[2,5,8,11][i]+1}: shape={f.shape}")
+#     print(len(extract_layers))
+#     for i, f in enumerate(extract_layers):
+#           print(f"  Layer {[2,5,8,11][i]+1}: shape={f.shape}")
 
-    """
-    Layer 3: shape=torch.Size([2, 768, 16, 16])
-    Layer 6: shape=torch.Size([2, 768, 16, 16])
-    Layer 9: shape=torch.Size([2, 768, 16, 16])
-    Layer 12: shape=torch.Size([2, 768, 16, 16])
+#     """
+#     Layer 3: shape=torch.Size([2, 768, 16, 16])
+#     Layer 6: shape=torch.Size([2, 768, 16, 16])
+#     Layer 9: shape=torch.Size([2, 768, 16, 16])
+#     Layer 12: shape=torch.Size([2, 768, 16, 16])
     
-    CLS token not included. 
-    """
+#     CLS token not included. 
+#     """
     
-    model = VitUnet(in_channel=11, num_classes=11, img_size=256)
-    dummy = torch.randn(2, 11, 256, 256)
-    out = model(dummy)
-    print(out.shape)  # [2, 11, 256, 256] READY FOR TRAINING
+#     model = VitUnet(in_channel=11, num_classes=11, img_size=256)
+#     dummy = torch.randn(2, 11, 256, 256)
+#     out = model(dummy)
+#     print(out.shape)  # [2, 11, 256, 256] READY FOR TRAINING
 
           
    

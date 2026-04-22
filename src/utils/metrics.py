@@ -57,17 +57,6 @@ def Evaluation(y_predicted, y_true):
 
     return info
 
-def save_confusion_matrix(y_gt, y_pred, labels, filename="confusion_matrix.png"):
-    cm = metr.confusion_matrix(y_gt, y_pred)
-    df = pd.DataFrame(cm, index=labels, columns=labels)
-    df.index.name = "True"
-    df.columns.name = "Predicted"
-
-    plt.figure(figsize=(6, 5))
-    sns.heatmap(df, annot=True, fmt="d", cmap="Blues", cbar=False)
-    plt.tight_layout()
-    plt.savefig(filename, dpi=300)
-    plt.close()
 
 def confusion_matrix(y_gt, y_pred, labels):
 
@@ -138,5 +127,30 @@ def confusion_matrix(y_gt, y_pred, labels):
     df = pd.DataFrame(np.array(cm_list))
     df.columns = first_row
     df.index = first_col
-
+    save_df_as_image(df)
     return df
+
+
+def save_df_as_image(df, filename="confusion_table.png"):
+    fig, ax = plt.subplots(figsize=(14, 10))
+    ax.axis('off')
+
+    table = ax.table(
+        cellText=df.values,
+        rowLabels=df.index,
+        colLabels=df.columns,
+        loc='center',
+        cellLoc='center'
+    )
+
+    table.auto_set_font_size(False)
+    table.set_fontsize(10)
+    table.scale(1, 1.5)
+
+    for (row, col), cell in table.get_celld().items():
+        if row == 0 or col == -1:
+            cell.set_text_props(weight='bold')
+
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
