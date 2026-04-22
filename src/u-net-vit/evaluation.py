@@ -31,7 +31,7 @@ import torchvision.transforms as transforms
 from vit_unet import VitUnet
 from dataloader import GenDEBRIS, bands_mean, bands_std
 from utils.metrics import Evaluation, confusion_matrix
-from utils.assets import labels
+from utils.assets import labels_agg_abr
 
 random.seed(0)
 np.random.seed(0)
@@ -54,10 +54,10 @@ def main(options):
                                 batch_size = options['batch'],
                                 shuffle = False)
 
-    global labels
+    global labels_agg_abr
     # Aggregate Distribution Mixed Water, Wakes, Cloud Shadows, Waves with Marine Water
-    if options['agg_to_water']:
-        labels = labels[:-4] # Drop Mixed Water, Wakes, Cloud Shadows, Waves
+    # if options['agg_to_water']:
+    #     labels_agg_abr = labels_agg_abr[:-4] # Drop Mixed Water, Wakes, Cloud Shadows, Waves
 
     # Use gpu or cpu
     if torch.cuda.is_available():
@@ -119,7 +119,7 @@ def main(options):
         logging.info("STATISTICS: \n")
         logging.info("Evaluation: " + str(acc))
         print("Evaluation: " + str(acc))
-        conf_mat = confusion_matrix(y_true, y_predicted, labels)
+        conf_mat = confusion_matrix(y_true, y_predicted, labels_agg_abr)
         logging.info("Confusion Matrix:  \n" + str(conf_mat.to_string()))
         print("Confusion Matrix:  \n" + str(conf_mat.to_string()))
        

@@ -42,6 +42,8 @@ labels_agg = ['Marine Debris','Dense Sargassum','Sparse Sargassum',
               'Natural Organic Material','Ship','Clouds','Marine Water','Sediment-Laden Water',
               'Foam','Turbid Water','Shallow Water']
 
+labels_agg_abr = ['MD', 'DenS','SpS', "NatM", 'Ship', 'Clouds', 'MWater', 'SLWater', 'Foam','TWater', 'SWater']
+
 roi_mapping = { '16PCC' : 'Motagua (16PCC)',
                 '16PDC' : 'Ulua (16PDC)',
                 '16PEC' : 'La Ceiba (16PEC)',
