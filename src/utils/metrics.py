@@ -146,8 +146,10 @@ def save_df_as_image(df, filename="confusion_table.png"):
     table.auto_set_font_size(False)
     table.set_fontsize(10)
     table.scale(1, 1.5)
-
+    row_label_width = 0.3
     for (row, col), cell in table.get_celld().items():
+        if col == -1:
+            cell.set_width(row_label_width)
         if row == 0 or col == -1:
             cell.set_text_props(weight='bold')
 
