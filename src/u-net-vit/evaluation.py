@@ -30,7 +30,7 @@ import torchvision.transforms as transforms
 
 from vit_unet import VitUnet
 from dataloader import GenDEBRIS, bands_mean, bands_std
-from utils.metrics import Evaluation, confusion_matrix, print_confusion_matrix_only
+from utils.metrics import Evaluation, confusion_matrix, save_confusion_matrix
 from utils.assets import labels
 
 random.seed(0)
@@ -120,10 +120,10 @@ def main(options):
         logging.info("Evaluation: " + str(acc))
         print("Evaluation: " + str(acc))
         conf_mat = confusion_matrix(y_true, y_predicted, labels)
-        conf_mat_only = print_confusion_matrix_only(y_true, y_predicted, labels)
+        save_confusion_matrix(y_true, y_predicted, labels)
         logging.info("Confusion Matrix:  \n" + str(conf_mat.to_string()))
         print("Confusion Matrix:  \n" + str(conf_mat.to_string()))
-        print("Confusion Matrix only \n:" + str(conf_mat_only.to_string()))
+       
 
         if options['predict_masks']:
 

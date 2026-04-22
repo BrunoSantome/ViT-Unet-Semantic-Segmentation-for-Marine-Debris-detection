@@ -15,6 +15,9 @@ from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_sc
 import sklearn.metrics as metr
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -54,12 +57,17 @@ def Evaluation(y_predicted, y_true):
 
     return info
 
-def print_confusion_matrix_only(y_gt, y_pred, labels):
+def save_confusion_matrix(y_gt, y_pred, labels, filename="confusion_matrix.png"):
     cm = metr.confusion_matrix(y_gt, y_pred)
     df = pd.DataFrame(cm, index=labels, columns=labels)
-    df.index.name = "True \\ Pred"
-    print(df.to_string())
-    return df
+    df.index.name = "True"
+    df.columns.name = "Predicted"
+
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(df, annot=True, fmt="d", cmap="Blues", cbar=False)
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300)
+    plt.close()
 
 def confusion_matrix(y_gt, y_pred, labels):
 
