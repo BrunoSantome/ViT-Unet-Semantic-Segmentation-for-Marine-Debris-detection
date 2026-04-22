@@ -120,7 +120,6 @@ def main(options):
         logging.info("Evaluation: " + str(acc))
         print("Evaluation: " + str(acc))
         conf_mat = confusion_matrix(y_true, y_predicted, labels)
-        save_confusion_matrix(y_true, y_predicted, labels)
         logging.info("Confusion Matrix:  \n" + str(conf_mat.to_string()))
         print("Confusion Matrix:  \n" + str(conf_mat.to_string()))
        
