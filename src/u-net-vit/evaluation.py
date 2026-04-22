@@ -30,7 +30,7 @@ import torchvision.transforms as transforms
 
 from vit_unet import VitUnet
 from dataloader import GenDEBRIS, bands_mean, bands_std
-from utils.metrics import Evaluation, confusion_matrix, save_confusion_matrix
+from utils.metrics import Evaluation, confusion_matrix
 from utils.assets import labels
 
 random.seed(0)
