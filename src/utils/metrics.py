@@ -54,6 +54,13 @@ def Evaluation(y_predicted, y_true):
 
     return info
 
+def print_confusion_matrix_only(y_gt, y_pred, labels):
+    cm = metr.confusion_matrix(y_gt, y_pred)
+    df = pd.DataFrame(cm, index=labels, columns=labels)
+    df.index.name = "True \\ Pred"
+    print(df.to_string())
+    return df
+
 def confusion_matrix(y_gt, y_pred, labels):
 
     # compute metrics
