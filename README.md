@@ -43,5 +43,6 @@ pip install -r requirements.txt
 
 Download the MARIDA dataset at [Link](https://zenodo.org/records/5151941) and put under data/ folder
 
+Download the Checkpoint from huggingface [Link] (https://huggingface.co/Brunaquen/MARIDA-ViT-UNet-Checkpoint/tree/main)
 
 Put the checkpoint under src/vit-net-vit/checkpoints/best_model/ , the file is too large to upload to github.
