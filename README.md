@@ -14,6 +14,7 @@ There is three models in total, in the current repository only the U-Net baselin
 src/
   u-net-Baseline/   U-Net model, training, evaluation
   u-net-vit/        ViT-UNet model, training, evaluation, checkpoints
+  u-net-vit/wandb   Zip file with the set of runs performed in local and google collab pro
   utils/            shared metrics, label/colour mappings, dataset assets
   utils/u-netr.py   UNETR architecture model for reference purposes
 notebooks/
