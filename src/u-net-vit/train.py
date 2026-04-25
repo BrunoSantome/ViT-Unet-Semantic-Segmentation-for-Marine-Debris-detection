@@ -6,17 +6,23 @@ Source: https://github.com/marine-debris/marine-debris.github.io
 Licence: MIT
 
 Description: train.py includes the training process for the
-             pixel-level semantic segmentation.
+             pixel-level semantic segmentation, adapted for the
+             ViT-UNet hybrid model.
 
-Modifications:
-- Replaced tensorboard (SummaryWriter) with wandb for experiment tracking.
-- Replaced relative path resolution (os.path.dirname) with explicit paths.
-- Removed --tensorboard arg, added --wandb_project arg. for logging
-
-todo: Change training loop and pipeline for our models.
-Cross-Entropy with class weighting or Focal Loss (like paper), 
-Optimizer AdamW, do augmentation, Maybe early stopping, Hyperparameters with Optuna?
-keep class weighting logic
+Modifications vs the baseline U-Net train.py:
+- Model: replaced UNet with VitUnet (ViT encoder + U-Net decoder).
+  Added --img_size and --pretrained args; removed --hidden_channels.
+- Optimizer: replaced Adam with AdamW (decoupled weight decay).
+- Data augmentation: added transforms.RandomVerticalFlip() on top of the
+  baseline's rotation + horizontal flip pipeline.
+- Checkpointing: instead of one checkpoint per epoch under
+  checkpoints/<epoch>/model.pth, now saves best_model.pth (tracked by
+  macro-F1) and last_model.pth under checkpoints/<run_name>/.
+- Metrics: added per-class F1, IoU, Precision, Recall logged to wandb
+  using class names from utils.assets.labels_agg.
+- Wandb: added --run_name arg passed to wandb.init(name=...) so runs are
+  identifiable; default --wandb_project renamed for the ViT variant.
+- Logging: log file renamed to log_vit_unet.log.
 
 '''
 

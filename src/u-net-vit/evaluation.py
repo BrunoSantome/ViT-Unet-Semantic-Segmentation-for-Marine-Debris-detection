@@ -7,12 +7,22 @@ Licence: MIT
 
 Description: evaluation.py includes the code in order to produce
              the evaluation for each class as well as the prediction
-             masks for the pixel-level semantic segmentation.
+             masks for the pixel-level semantic segmentation, adapted
+             for the ViT-UNet hybrid model.
 
-Modifications:
-- Replaced relative path resolution (sys.path / os.path.dirname chains) with direct imports.
-- Updated default paths for new project structure.
-- Use rasterio to load .tif images
+Modifications vs the baseline U-Net evaluation.py:
+- Model: replaced UNet with VitUnet (ViT encoder + U-Net decoder).
+  Added --img_size and --pretrained args; removed --hidden_channels.
+- Labels: switched from `labels` (15 full names + runtime slicing when
+  --agg_to_water is True) to the pre-aggregated, abbreviated
+  `labels_agg_abr` from utils.assets — used for confusion-matrix rows.
+- Predicted-mask paths: now built from --data_path (patches/ and
+  splits/test_X.txt) instead of a hardcoded 'data' root, so the script
+  works with the dataset placed anywhere.
+- Output filename suffix: `_unet.tif` -> `_vitunet.tif` to keep both
+  models' predictions distinguishable in the same gen_masks_path.
+- Default --model_path updated to the new run_name/best_model.pth
+  checkpoint layout written by train.py.
 '''
 
 import os
