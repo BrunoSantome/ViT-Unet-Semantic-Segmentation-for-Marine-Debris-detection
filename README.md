@@ -26,9 +26,10 @@ outputs/            generated figures, Marida original paper,
 
 ## Workflow
 
-1. **Train** — `python src/u-net-vit/train.py --data_path /content/data/MARIDA/` (or the baseline equivalent), important to precise the correct path for the data. Logs to wandb, writes checkpoints under `checkpoints/`. 
+1. **Train** — `python src/u-net-vit/train.py --data_path /content/data/MARIDA/` (or the baseline equivalent), important to precise the correct path for the data. Logs to wandb, writes checkpoints under `checkpoints/`.  Parameters can be passed to tune everything, see train.py parser for parameters, default and description.
 
-2. **Evaluate** — `python src/u-net-vit/evaluation.py --predict_masks True` runs the test set and writes per-patch georeferenced class-index `.tif`s to `data/predicted_unet/`.
+2. **Evaluate** — `python src/u-net-vit/evaluation.py --predict_masks True` runs the test set and writes per-patch georeferenced class-index `.tif`s to `data/predicted_unet/`. Parameters can be passed to tune everything, see evaluation.py parser for parameters, default and description.
+
 
 
 3. **Visualise** — open the generated masks in QGIS (Paletted/Unique values style with the MARIDA palette) or use `notebooks/inference_notebook.ipynb` to render an RGB composite alongside the predicted mask.
