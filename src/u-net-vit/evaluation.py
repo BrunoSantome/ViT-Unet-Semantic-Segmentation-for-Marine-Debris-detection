@@ -50,7 +50,7 @@ def main(options):
 
     dataset_test = GenDEBRIS('test', transform=transform_test, standardization = standardization, path = options['data_path'], agg_to_water = options['agg_to_water'])
 
-    test_loader = DataLoader(   dataset_test,
+    test_loader = DataLoader(dataset_test,
                                 batch_size = options['batch'],
                                 shuffle = False)
 
@@ -58,8 +58,8 @@ def main(options):
     # Aggregate Distribution Mixed Water, Wakes, Cloud Shadows, Waves with Marine Water
     # if options['agg_to_water']:
     #     labels_agg_abr = labels_agg_abr[:-4] # Drop Mixed Water, Wakes, Cloud Shadows, Waves
-
     # Use gpu or cpu
+    
     if torch.cuda.is_available():
         device = torch.device("cuda")
     else:

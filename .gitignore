@@ -3,8 +3,8 @@ data/MARIDA/
 test.py
 src/u-net-Baseline/wandb
 src/u-net-Baseline/checkpoints
-src/u-net-vit/wandb
-src/u-net-vit/checkpoints
+#src/u-net-vit/wandb
 upload_dataset.py
 src/tests.py
 src/model.py
+src/u-net-vit/data
