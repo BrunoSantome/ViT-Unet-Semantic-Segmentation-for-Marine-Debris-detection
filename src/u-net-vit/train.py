@@ -50,17 +50,6 @@ from utils.assets import labels_agg
 logging.basicConfig(filename=os.path.join('logs','log_vit_unet.log'), filemode='a',level=logging.INFO, format='%(name)s - %(levelname)s - %(message)s')
 logging.info('*'*10)
 
-# class SpectralJitter:
-#     def __init__(self, brightness=0.1, contrast=0.1, p=0.5):
-#         self.b, self.c, self.p = brightness, contrast, p
-#     def __call__(self, x):
-#         if torch.rand(1).item() < self.p:
-#             C = x.shape[0]
-#             bright = 1.0 + (torch.rand(C, 1, 1) * 2 - 1) * self.b
-#             contr  = 1.0 + (torch.rand(C, 1, 1) * 2 - 1) * self.c
-#             mean = x.mean(dim=(1, 2), keepdim=True)
-#             x = (x - mean) * contr + mean * bright
-#         return x
 
 def seed_all(seed):
     # Pytorch Reproducibility

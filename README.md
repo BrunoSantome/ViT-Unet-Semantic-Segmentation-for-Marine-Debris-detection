@@ -1,10 +1,11 @@
 # Marine Debris Semantic Segmentation (INM705 Coursework)
 
-Pixel-level semantic segmentation of marine plastic debris on Sentinel-2 satellite imagery, using the [MARIDA](https://marine-debris.github.io/) dataset (11-band patches, 256×256, 11 aggregated classes including Marine Debris, Sargassum, Ships, Clouds, Marine Water, etc.).
+Pixel-level semantic segmentation of marine plastic debris on Sentinel-2 satellite imagery, using the [MARIDA](https://zenodo.org/records/5151941) [MARIDA github](https://marine-debris.github.io/) dataset (11-band patches, 256×256, 11 aggregated classes including Marine Debris, Sargassum, Ships, Clouds, Marine Water, etc.).
 
-Two models are implemented and compared:
+There is three models in total, in the current repository only the U-Net baseline model was cloned since the evaluation and training of the model are re-used and tuned for the ViT-UNet model. 
 
-- **U-Net baseline** — Implementation of the original MARIDA U-Net for reference results.
+- **Random Forest** — Refer to the github [Github](https://marine-debris.github.io/) of MARIDA study for further details on it.
+- **U-Net baseline** — Cloning of the original MARIDA U-Net for reference results.
 - **ViT-UNet hybrid** — a U-Net decoder built on top of a pretrained ViT encoder (`vit_base_patch16_224` from `timm`), with the patch-embedding layer adapted from 3 RGB channels to 11 Sentinel-2 bands.
 
 ## Repository layout
@@ -25,7 +26,8 @@ outputs/            generated figures, Marida original paper,
 
 ## Workflow
 
-1. **Train** — `python src/u-net-vit/train.py` (or the baseline equivalent). Logs to wandb, writes checkpoints under `checkpoints/`.
+1. **Train** — `python src/u-net-vit/train.py --data_path /content/data/MARIDA/` (or the baseline equivalent), important to precise the correct path for the data. Logs to wandb, writes checkpoints under `checkpoints/`. 
+
 2. **Evaluate** — `python src/u-net-vit/evaluation.py --predict_masks True` runs the test set and writes per-patch georeferenced class-index `.tif`s to `data/predicted_unet/`.
 
 
@@ -36,3 +38,8 @@ outputs/            generated figures, Marida original paper,
 ```bash
 pip install -r requirements.txt
 ```
+
+Download the MARIDA dataset at [Link](https://zenodo.org/records/5151941) and put under data/ folder
+
+
+Put the checkpoint under src/vit-net-vit/checkpoints/best_model/ , the file is too large to upload to github.
