@@ -1,4 +1,4 @@
-# Marine Debris Semantic Segmentation (INM705 Coursework)
+# Marine Debris Semantic Segmentation
 
 Pixel-level semantic segmentation of marine plastic debris on Sentinel-2 satellite imagery, using the [MARIDA](https://zenodo.org/records/5151941) [MARIDA github](https://marine-debris.github.io/) dataset (11-band patches, 256×256, 11 aggregated classes including Marine Debris, Sargassum, Ships, Clouds, Marine Water, etc.).
 
