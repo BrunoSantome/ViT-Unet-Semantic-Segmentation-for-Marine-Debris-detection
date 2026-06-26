@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # ViT-UNet for Marine Debris Semantic Segmentation
+=======
+# Marine Debris Semantic Segmentation
+>>>>>>> 3ccf0c8e1f35c0edba169d1880cfd5baf966d918
 
 **Pixel-level segmentation of ocean plastic on Sentinel-2 satellite imagery — a hybrid Vision Transformer + U-Net that beats the published [MARIDA](https://marine-debris.github.io/) Random Forest and U-Net baselines on average IoU, F1 and Pixel Accuracy.**
 
