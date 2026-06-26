@@ -2,11 +2,6 @@
 
 **Pixel-level segmentation of ocean plastic on Sentinel-2 satellite imagery — a hybrid Vision Transformer + U-Net that beats the published [MARIDA](https://marine-debris.github.io/) Random Forest and U-Net baselines on average IoU, F1 and Pixel Accuracy.**
 
-<!--
-  HERO IMAGE — add assets/segmentation_comparison.png here (Figure 5 from the report):
-  the RGB / RF / U-Net / ViT-UNet side-by-side masks. This is the single most important
-  image; it shows the result at a glance. Export it at high resolution.
--->
 ![Segmentation comparison: RGB input vs Random Forest, U-Net, and ViT-UNet predictions](outputs/assets/segmentation_comparison.png)
 
 ---
@@ -56,11 +51,8 @@ The largest gains come on visually ambiguous classes (Foam +0.21, Natural Organi
 
 </details>
 
-<!--
-  Optional second image — add assets/training_curves.png (Figure 3/4 from the report):
-  the IoU/F1 evaluation curves and the aligned train/eval loss curves showing good
-  generalisation. Nice-to-have, not essential.
--->
+
+![Training and evaluation curves: Macro-IoU/F1 rising over training, with aligned train/eval loss showing good generalisation](outputs/assets/training_curves.png)
 
 ---
 
@@ -162,4 +154,4 @@ python src/u-net-vit/evaluation.py --predict_masks True
 
 ---
 
-*Built as coursework for the MSc Artificial Intelligence (Deep Learning for Image Analysis, INM705) at City St George's, University of London.*
+*Built as coursework for the MSc Artificial Intelligence (Deep Learning for Image Analysis, INM705) at City St George's, University of London — awarded 79.9/100 (Distinction).*
