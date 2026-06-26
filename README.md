@@ -1,6 +1,16 @@
 # ViT-UNet for Marine Debris Semantic Segmentation
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)
+![timm](https://img.shields.io/badge/timm-ViT--B%2F16-792EE5)
+![Weights & Biases](https://img.shields.io/badge/Experiment%20tracking-W%26B-FFBE00?logo=weightsandbiases&logoColor=black)
+![Sentinel-2](https://img.shields.io/badge/Data-Sentinel--2%20%2F%20MARIDA-0B3D91)
+![Task](https://img.shields.io/badge/Task-Semantic%20Segmentation-success)
+![Grade](https://img.shields.io/badge/Grade-82%2F100%20Distinction-brightgreen)
+
 **Pixel-level segmentation of ocean plastic on Sentinel-2 satellite imagery — a hybrid Vision Transformer + U-Net that beats the published [MARIDA](https://marine-debris.github.io/) Random Forest and U-Net baselines on average IoU, F1 and Pixel Accuracy.**
+
+> **Skills demonstrated:** transfer learning & pretrained-backbone adaptation (weight surgery, positional-embedding interpolation) · transformer/CNN hybrid architecture design · multispectral (11-band) remote-sensing data engineering · class-imbalance handling · rigorous baseline comparison & error analysis · experiment tracking and reproducibility.
 
 ![Segmentation comparison: RGB input vs Random Forest, U-Net, and ViT-UNet predictions](outputs/assets/segmentation_comparison.png)
 
@@ -98,7 +108,7 @@ This is a feature of the writeup, not a thing to hide — knowing *why* a model 
 ```
 src/
   u-net-vit/         ViT-UNet model, training, evaluation, checkpoints
-    vit-unet.py        architecture (encoder + decoder + skip connections)
+    vit_unet.py        architecture (encoder + decoder + skip connections)
     dataloader.py      11-band Sentinel-2 patch loading + augmentation
     train.py           training loop, W&B logging, checkpointing
     evaluation.py      test-set metrics + georeferenced mask export
@@ -109,8 +119,9 @@ notebooks/
   marida_runs2.ipynb        evaluation (Google Colab Pro)
   inference_notebook.ipynb  load checkpoint, run test set, render predictions
 data/MARIDA/         dataset root — download separately (see Setup)
-assets/              figures used in this README
-outputs/             generated figures and prediction masks
+outputs/
+  assets/            figures used in this README
+  ...                generated prediction masks
 ```
 
 > **Attribution:** This project builds directly on the MARIDA benchmark (Kikaki et al., 2022). The Random Forest and U-Net baselines, and the core structure of the training/evaluation loops, are adapted from the [original MARIDA repository](https://github.com/marine-debris/marine-debris.github.io) to keep results directly comparable. The ViT-UNet architecture, the channel/positional adaptations, and the comparative analysis are my own work.
