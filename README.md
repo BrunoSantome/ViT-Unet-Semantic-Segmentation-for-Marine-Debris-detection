@@ -154,4 +154,4 @@ python src/u-net-vit/evaluation.py --predict_masks True
 
 ---
 
-*Built as coursework for the MSc Artificial Intelligence (Deep Learning for Image Analysis, INM705) at City St George's, University of London — awarded 79.9/100 (Distinction).*
+*Built as coursework for the MSc Artificial Intelligence (Deep Learning for Image Analysis, INM705) at City St George's, University of London — awarded 82/100 (Distinction).*
